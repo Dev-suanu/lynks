@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+
+@theme {
+  /* This overrides the default sans font with your Poppins variable */
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  
+  /* Optional: If you want a specific brand font name */
+  --font-poppins: var(--font-poppins);
+}
+
+
+:root {
+  font-family: var(--font-poppins);
+  --background: #050505;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #050506;
+    --foreground: #ededed;
+  }
+}
+
+.emoji-font {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .custom-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* LG Screens: Show and style the scrollbar */
+  @media (min-width: 1024px) {
+    .custom-scrollbar::-webkit-scrollbar {
+      display: block;
+      width: 5px; /* Smaller width */
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      /* Applying your gradient colors */
+      background: linear-gradient(to bottom, #07692d, #00B33C);
+      border-radius: 10px;
+    }
+
+    .custom-scrollbar {
+      -ms-overflow-style: auto;
+      scrollbar-width: thin;
+      /* Firefox specific color matching */
+      scrollbar-color: #00B33C rgba(255, 255, 255, 0.02);
+    }
+  }
+}
+
+/* Custom Driver.js Theme */
+.driverjs-theme {
+  background-color: #1a1a1a !important;
+  color: white !important;
+  border: 1px solid #4ade80 !important; /* Lime border */
+  border-radius: 12px !important;
+}
+
+.driver-popover-title {
+  color: #a3e635 !important; /* Lime text */
+  font-weight: 900 !important;
+}
+
+.driver-popover-description {
+  color: #d1d5db !important;
+}
+
+.driver-popover-btn-next {
+  background-color: #a3e635 !important;
+  color: black !important;
+  text-shadow: none !important;
+}

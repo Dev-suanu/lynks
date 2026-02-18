@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role{
+  User
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  password      String?
+  email         String?   @unique
+  image         String?
+  role          Role      @default(User)
+  credits       Int       @default(15) // Initial signup credits
+  accounts      Account[]
+  sessions      Session[]   
+  posts         Post[]
+  submissions   Submission[]
+}
+
+model Post {
+  id          String       @id @default(cuid())
+  url       String
+  reward      Int          @default(1)
+  authorId    String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+  maxSubmissions Int        @default(50)
+  createdAt   DateTime     @default(now())
+}
+
+model Submission {
+  id           String   @id @default(cuid())
+  proofUrl   String
+  status       String   @default("PENDING") // PENDING, VERIFIED, REJECTED
+  postId       String
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  rejectionReason String?
+  isDisputed      Boolean  @default(false)
+}
+
+// NextAuth standard Account model
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String @unique
+  token      String   
+  expires    DateTime
+  @@unique([identifier, token])
+}
