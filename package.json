@@ -2,6 +2,9 @@
   "name": "lynks",
   "version": "0.1.0",
   "private": true,
+  "config": {
+    "npm-install": "--legacy-peer-deps"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
