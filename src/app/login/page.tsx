@@ -54,7 +54,7 @@ export default function LoginPage() {
             {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
             <div className="text-center mt-4">
               <p className="text-sm text-[#808080]">
-                Already have an account?{" "}
+                Don't have an account?{" "}
                 <button
                   type="button"
                   onClick={() => router.push("/register")}
