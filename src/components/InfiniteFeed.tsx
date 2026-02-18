@@ -61,6 +61,7 @@ export default function InfiniteFeed({ initialPosts, userId }: { initialPosts: a
                 postId={post.id} 
                 hasSubmitted={false} 
                 reward={post.reward} 
+                classname=""
               />
             </div>
           </div>
