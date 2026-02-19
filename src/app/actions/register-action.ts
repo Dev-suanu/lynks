@@ -102,7 +102,7 @@ export async function registerUser(formData: FormData) {
       data: {
         email,
         password: hashedPassword,
-        credits: 10, 
+        credits: 25, 
         name: "",
       },
     });
