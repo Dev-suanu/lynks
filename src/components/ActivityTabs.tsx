@@ -16,7 +16,7 @@ import {
 import { updateSubmissionStatusAction } from "@/app/actions/submission";
 import { deletePostAction } from "@/app/actions/post";
 import { CreditIcon } from "@/components/CreditIcon";
-// import { markNotificationsAsReadAction } from "@/app/actions/notification";
+import { markNotificationsAsReadAction } from "@/app/actions/notification";
 import Badge from "@/components/Badge";
 
 interface Props {
