@@ -1,17 +1,22 @@
 import NextAuth, { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
-  /**
-   * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
-   */
   interface Session {
     user: {
       id: string;
-      credits: number; // Add your custom field here
+      credits: number;
     } & DefaultSession["user"];
   }
 
   interface User {
-    credits: number; // Also add it to the User object
+    id: string;
+    credits: number;
   }
 }
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    credits: number;
+  }
+}s

@@ -60,9 +60,10 @@ export async function submitProofAction(prevState: any, formData: FormData) {
 }
 
 // 2. Update Status (Approve/Reject)
+// 2. Update Status (Approve/Reject)
 export async function updateSubmissionStatusAction(
   submissionId: string,
-  newStatus: "APPROVED" | "REJECTED",
+  newStatus: "APPROVED" | "REJECTED" | "DISPUTED",
   reason?: string 
 ) {
   const session = await auth();
@@ -73,11 +74,25 @@ export async function updateSubmissionStatusAction(
     include: { post: true }
   });
 
-  if (!submission || submission.post.authorId !== session.user.id) {
-    throw new Error("You do not have permission to review this submission");
+  if (!submission) throw new Error("Submission not found");
+
+  // SECURITY CHECK
+  const isAuthor = submission.post.authorId === session.user.id;
+  const isOwner = submission.userId === session.user.id;
+  const isAdmin = (session.user as any).role === "ADMIN"; // Added Admin check
+
+  if (newStatus === "DISPUTED") {
+    if (!isOwner) throw new Error("Only the owner can dispute this.");
+  } else {
+    // Admins or the Post Author can Approve/Reject
+    if (!isAuthor && !isAdmin) throw new Error("Unauthorized review.");
   }
 
-  if (submission.status !== "PENDING") return;
+  // FIX: Allow status changes if it's PENDING, DISPUTED, or REJECTED
+  // We only block updates if it's already APPROVED (to prevent double payment)
+  if (submission.status === "APPROVED") {
+    throw new Error("This submission is already approved and paid.");
+  }
 
   try {
     if (newStatus === "APPROVED") {
@@ -85,7 +100,7 @@ export async function updateSubmissionStatusAction(
       await prisma.$transaction([
         prisma.submission.update({
           where: { id: submissionId },
-          data: { status: "APPROVED", rejectionReason: null }
+          data: { status: "APPROVED", rejectionReason: null, isDisputed: false }
         }),
         prisma.user.update({
           where: { id: submission.userId },
@@ -93,35 +108,42 @@ export async function updateSubmissionStatusAction(
         })
       ]);
 
-      // 2. CLEANUP: Delete screenshot from UploadThing storage
-      // Extracts the key from the end of the URL (e.g., utfs.io/f/FILE_KEY)
+      // 2. CLEANUP: Delete screenshot
       const fileKey = submission.proofUrl.split("/").pop();
-      if (fileKey) {
+      if (fileKey && !submission.proofUrl.includes("CLEARED")) {
         try {
           await utapi.deleteFiles(fileKey);
-          // Optional: update the URL string in DB to show it was cleared
           await prisma.submission.update({
             where: { id: submissionId },
             data: { proofUrl: "CLEARED_ON_APPROVAL" }
           });
         } catch (err) {
-          console.error("UT Cleanup failed (non-critical):", err);
+          console.error("UT Cleanup failed:", err);
         }
       }
-    } else {
-      // 3. REJECTED: Update status only, KEEP the screenshot for disputes
+    } else if (newStatus === "REJECTED") {
       await prisma.submission.update({
         where: { id: submissionId },
         data: { 
           status: "REJECTED", 
-          rejectionReason: reason || "No reason provided." 
+          rejectionReason: reason || "No reason provided.",
+          isDisputed: false // Reset dispute flag if admin re-rejects
+        }
+      });
+    } else if (newStatus === "DISPUTED") {
+      await prisma.submission.update({
+        where: { id: submissionId },
+        data: { 
+          status: "DISPUTED", 
+          rejectionReason: reason || "User raised a dispute.",
+          isDisputed: true 
         }
       });
     }
 
     revalidatePath(`/task/${submission.postId}`); 
     revalidatePath("/activity");
-    revalidatePath("/"); 
+    revalidatePath("/admin/disputes"); // Refresh your admin queue
     
     return { success: true };
   } catch (error) {
@@ -129,7 +151,6 @@ export async function updateSubmissionStatusAction(
     throw new Error("Failed to process status update.");
   }
 }
-
 // 3. Dispute Action
 export async function disputeSubmissionAction(submissionId: string) {
   const session = await auth();

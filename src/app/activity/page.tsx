@@ -54,18 +54,25 @@ export default async function ActivityPage() {
   );
 
   // 3. YOUR CREATED POSTS - COUNT FILTERED FOR PENDING
-  const rawPosts = await prisma.post.findMany({
-    where: { authorId: session.user.id },
-    include: {
-      _count: { 
-        select: { 
-          // This count will now show how many tasks are WAITING for review
-          submissions: { where: { status: "PENDING" } } 
-        } 
-      }
+ // 3. YOUR CREATED POSTS - FETCHING BOTH PENDING AND TOTAL
+const rawPosts = await prisma.post.findMany({
+  where: { authorId: session.user.id },
+  include: {
+    _count: { 
+      select: { 
+        // Use a separate key for pending if your Prisma version supports it, 
+        // OR simply fetch the total and handle the pending count via the receivedSubmissions prop.
+        submissions: true 
+      } 
     },
-    orderBy: { createdAt: "desc" }
-  });
+    // To get the specific Pending count directly from Prisma:
+    submissions: {
+      where: { status: "PENDING" },
+      select: { id: true }
+    }
+  },
+  orderBy: { createdAt: "desc" }
+});
 
   const myCreatedPosts = await Promise.all(
     rawPosts.map(async (post) => {

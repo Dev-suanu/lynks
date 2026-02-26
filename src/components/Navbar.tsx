@@ -178,7 +178,9 @@ export default function Navbar() {
         </Link>
 
         <Link href="/activity" id="mobile-nav-activity" className="flex flex-col justify-center items-center gap-1">
-          <History {...getIconProps("/activity")} />
+          <Badge count={unreadCount}>
+            <History {...getIconProps("/activity")} />
+          </Badge>
         </Link>
 
         <Link href='/profile' className="flex flex-col justify-center items-center gap-1">

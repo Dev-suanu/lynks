@@ -3,7 +3,8 @@ import { Poppins, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Providers } from "@/components/Providers";
-import WelcomeTour from "@/components/WelcomeTour"; // We will create this below
+import WelcomeTour from "@/components/WelcomeTour"; 
+import { Analytics } from "@vercel/analytics/react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
             {children}
           </main>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
