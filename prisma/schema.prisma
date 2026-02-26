@@ -30,6 +30,7 @@ model User {
   sessions      Session[]   
   posts         Post[]
   submissions   Submission[]
+  notifications Notification[]
 }
 
 model Post {
@@ -80,6 +81,18 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // e.g., "STATUS_UPDATE" or "NEW_SUBMISSION"
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model VerificationToken {
